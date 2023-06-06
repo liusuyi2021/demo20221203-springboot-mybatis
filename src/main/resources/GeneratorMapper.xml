@@ -4,8 +4,9 @@
         "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
 <generatorConfiguration>
     <!-- 指定连接数据库的 JDBC 驱动包所在位置，指定到你本机的完整路径 -->
-    <classPathEntry location="D:\workspace\.m2\repository\com\mysql\mysql-connector-j\8.0.31\mysql-connector-j-8.0.31.jar"/>
+<!--    <classPathEntry location="D:\workspace\.m2\repository\com\mysql\mysql-connector-j\8.0.31\mysql-connector-j-8.0.31.jar"/>-->
 
+    <classPathEntry location="D:\ENV\repository\org\postgresql\postgresql\42.5.0\postgresql-42.5.0.jar"/>
     <!-- 配置 table 表信息内容体，targetRuntime 指定采用 MyBatis3 的版本 -->
     <context id="tables" targetRuntime="MyBatis3">
         <!-- 抑制生成注释，由于生成的注释都是英文的，可以不让它生成 -->
@@ -13,10 +14,15 @@
             <property name="suppressAllComments" value="true"/>
         </commentGenerator>
         <!-- 配置数据库连接信息 -->
-        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://112.98.126.2:33306/ard732?serverTimezone=UTC"
-                        userId="root"
-                        password="admin12345">
+<!--        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"-->
+<!--                        connectionURL="jdbc:mysql://112.98.126.2:33306/ard732?serverTimezone=UTC"-->
+<!--                        userId="root"-->
+<!--                        password="admin12345">-->
+<!--        </jdbcConnection>-->
+        <jdbcConnection driverClass="org.postgresql.Driver"
+                        connectionURL="jdbc:postgresql://127.0.0.1:5432/ry-vue?stringtype=unspecified"
+                        userId="postgres"
+                        password="5959932">
         </jdbcConnection>
         <!-- 生成 model 类，targetPackage 指定 model 类的包名， targetProject 指定
        生成的 model 放在 eclipse 的哪个工程下面-->
@@ -38,7 +44,7 @@
             <property name="enableSubPackages" value="false"/>
         </javaClientGenerator>
         <!-- 数据库表名及对应的 Java 模型类名 -->
-        <table tableName="ard_nvr_channel" domainObjectName="ArdNvrChannel"
+        <table tableName="ard_tubes_details" domainObjectName="ArdTubesDetails"
                enableCountByExample="false"
                enableUpdateByExample="false"
                enableDeleteByExample="false"
