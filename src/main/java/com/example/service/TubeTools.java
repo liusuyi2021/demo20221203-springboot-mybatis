@@ -1,119 +1,39 @@
 package com.example.service;
 
-import com.example.mapper.ArdTubesDetailsMapper;
 import com.example.model.ArdTubesDetails;
-import com.example.model.ArdTubesDetailsExample;
 import lombok.extern.slf4j.Slf4j;
-import org.gavaghan.geodesy.Ellipsoid;
-import org.gavaghan.geodesy.GeodeticCalculator;
-import org.gavaghan.geodesy.GlobalCoordinates;
-import org.gavaghan.geodesy.GlobalPosition;
 import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 
 /**
- * @ClassName TestService
- * @Description:
+ * @ClassName TubeTools
+ * @Description: 管线计算工具
  * @Author 刘苏义
  * @Date 2023/6/6 19:29
  * @Version 1.0
  */
 @Service
 @Slf4j
-public class TestService {
-    @Resource
-    ArdTubesDetailsMapper ardTubesDetailsMapper;
-
-    @PostConstruct
-    void getList() {
-        Integer alarmPointDistance = 10;
-        ArdTubesDetailsExample ardTubesDetailsExample = new ArdTubesDetailsExample();
-        ardTubesDetailsExample.createCriteria().andReelNumberEqualTo("10");
-        List<ArdTubesDetails> ardTubesDetails = ardTubesDetailsMapper.selectByExample(ardTubesDetailsExample);
-        Comparator<ArdTubesDetails> comparator = Comparator.comparingInt(person -> Integer.parseInt(person.getInflectionPointNumber())); // 使用Collections.sort方法进行排序
-        Collections.sort(ardTubesDetails, comparator);
-        double x = ardTubesDetails.get(0).getLongitude();
-        double y = ardTubesDetails.get(0).getLatitude();
-        TreeMap<Integer, Double> distanceMap = new TreeMap<>();
-        TreeMap<Integer, Object> tubeMap = new TreeMap<>();
-        double distance = 0.0;
-        for (ArdTubesDetails atd : ardTubesDetails) {
-            distance += getDistance(x, y, atd.getLongitude(), atd.getLatitude());
-            distanceMap.put(Integer.parseInt(atd.getInflectionPointNumber()), distance);
-            tubeMap.put(Integer.parseInt(atd.getInflectionPointNumber()), atd);
-            x = atd.getLongitude();
-            y = atd.getLatitude();
-        }
-        Integer num = 0;
-        double tempDistance=0.0;
-        while(tempDistance<alarmPointDistance)
-        {
-            num++;
-            tempDistance = distanceMap.get(num);
-        }
-
-        log.info("报警点在拐点" + (num-1) + "-" + num + "之间,距离差" + (tempDistance-alarmPointDistance));
-        ///124.92802845939386	46.686676183960614	142.367551661885
-        ArdTubesDetails point1 = (ArdTubesDetails) tubeMap.get(num-1);
-        double x0 = point1.getLongitude();
-        double y0 = point1.getLatitude();
-        ArdTubesDetails point2 = (ArdTubesDetails) tubeMap.get(num);
-        double x1 = point2.getLongitude();
-        double y1 = point2.getLatitude();
-
-        /*计算报警点坐标*/
-        double d = alarmPointDistance - distanceMap.get(num - 1);
-        GeoPoint aPoint = new GeoPoint(x0, y0);
-        GeoPoint bPoint = new GeoPoint(x1, y1);
-        GeoPoint geoPoint = caculateRawGeoPoint(aPoint, bPoint, d);
-        log.info(geoPoint.toString());
-    }
-
-
-    public static void main1(String[] args) {
-        // 已知起点的坐标
-        double x1 = 124.925490653;
-        double y1 = 46.687071291;
-        double z1 = 148.2;
-
-        // 已知终点的坐标
-        double x2 = 124.926401943;
-        double y2 = 46.686812672;
-        double z2 = 143.5;
-
-        // 已知任意点到起点的距离
-        double d = 100.0;
-
-        double vx = x2 - x1;
-        double vy = y2 - y1;
-        double vz = z2 - z1;
-        double vLength = Math.sqrt(vx*vx + vy*vy + vz*vz);
-        double tx = vx * d / vLength;
-        double ty = vy * d / vLength;
-        double tz = vz * d / vLength;
-        double x = x1 + tx;
-        double y = y1 + ty;
-        double z = z1 + tz;
-        // 输出结果
-        System.out.println("任意点的坐标：(" + x + ", " + y + ", " + z + ")");
-    }
-
+public class TubeTools {
     public static void main(String[] args) {
         // 假设给定的三个坐标点 A、B、C
-        double x1 = 124.925198285;
-        double y1 = 46.68693001;
-        double x2 = 124.92530552899079;
-        double y2 = 46.68698183351785;
-        double x3 = 124.925490653;
-        double y3 = 46.687071291;
+        double x1 = 124.939903268;
+        double y1 = 46.684520056;
+        double x2 = 124.94049634327537;
+        double y2 = 46.68442539350505;
+        double x3 = 124.940552075;
+        double y3 = 46.684416498;
 
+        double distance = getDistance(x1, y1, x3, y3);
+        log.info("总距离:" + distance);
         double distance1 = getDistance(x1, y1, x2, y2);
+        log.info("距离起点距离:" + distance1);
         double distance2 = getDistance(x2, y2, x3, y3);
+        log.info("距离终点距离:" + distance2);
         // 计算斜率
         double slope1 = (y2 - y1) / (x2 - x1);
         double slope2 = (y3 - y2) / (x3 - x2);
@@ -130,6 +50,73 @@ public class TestService {
     }
 
     /**
+     * @描述 计算坐标
+     * @参数 [ardTubesDetails, alarmPointDistance]
+     * @返回值 void
+     * @创建人 刘苏义
+     * @创建时间 2023/6/8 14:38
+     * @修改人和其它信息
+     */
+    public static void CalculateCoordinates(List<ArdTubesDetails> ardTubesDetails, Integer alarmPointDistance) {
+
+        Comparator<ArdTubesDetails> comparator = Comparator.comparingInt(person -> Integer.parseInt(person.getInflectionPointNumber())); // 使用Collections.sort方法进行排序
+        Collections.sort(ardTubesDetails, comparator);
+        double x = ardTubesDetails.get(0).getLongitude();
+        double y = ardTubesDetails.get(0).getLatitude();
+        TreeMap<Integer, Double> distanceMap = new TreeMap<>();
+        TreeMap<Integer, Object> tubeMap = new TreeMap<>();
+        double distance = 0.0;
+        for (ArdTubesDetails atd : ardTubesDetails) {
+            distance += getDistance(x, y, atd.getLongitude(), atd.getLatitude());
+            distanceMap.put(Integer.parseInt(atd.getInflectionPointNumber()), distance);
+            tubeMap.put(Integer.parseInt(atd.getInflectionPointNumber()), atd);
+            x = atd.getLongitude();
+            y = atd.getLatitude();
+        }
+        Integer num = 0;
+        double tempDistance = 0.0;
+        while (tempDistance < alarmPointDistance) {
+            num++;
+            tempDistance = distanceMap.get(num);
+        }
+        log.info("报警点在拐点" + (num - 1) + "-" + num + "之间,总距离" + (tempDistance - distanceMap.get(num - 1)));
+        ArdTubesDetails point1 = (ArdTubesDetails) tubeMap.get(num - 1);
+        double x0 = point1.getLongitude();
+        double y0 = point1.getLatitude();
+        double z0 = point1.getAltitude();
+        ArdTubesDetails point2 = (ArdTubesDetails) tubeMap.get(num);
+        double x1 = point2.getLongitude();
+        double y1 = point2.getLatitude();
+        double z1 = point2.getAltitude();
+        /*计算报警点坐标*/
+        double d = alarmPointDistance - distanceMap.get(num - 1);
+        GeoPoint aPoint = new GeoPoint(x0, y0, z0);
+        GeoPoint bPoint = new GeoPoint(x1, y1, z1);
+        GeoPoint geoPoint = caculateRawGeoPoint(aPoint, bPoint, d);
+        double height = interpolateHeight(aPoint, bPoint, geoPoint);
+        geoPoint.setAltitude(height);
+        log.info("计算结果:" + geoPoint);
+    }
+
+    // 线性插值计算任意点的高度
+    private static double interpolateHeight(GeoPoint startPoint, GeoPoint endPoint, GeoPoint alarmPoint) {
+        double startX = startPoint.getLongitude();
+        double startY = startPoint.getLatitude();
+        double startZ = startPoint.getAltitude();
+        double endX = endPoint.getLongitude();
+        double endY = endPoint.getLatitude();
+        double endZ = endPoint.getAltitude();
+        // 目标点的坐标
+        double targetX = alarmPoint.getLongitude();
+        double targetY = alarmPoint.getLatitude();
+        double distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+        double targetDistance = Math.sqrt(Math.pow(targetX - startX, 2) + Math.pow(targetY - startY, 2));
+        double t = targetDistance / distance;
+        double targetHeight = startZ + t * (endZ - startZ);
+        return targetHeight;
+    }
+
+    /**
      * 已知WGS84坐标系 A 点，B点, X 在AB 弧线上, 且是最短的这条, AX距离已知，求X点坐标.
      *
      * @param aPoint
@@ -143,7 +130,7 @@ public class TestService {
         double angle = getAngle(a, b);
         //double angle = GisUtil.getNorthAngle(a.getM_Longitude(),a.getM_Latitude(), b.getM_Longitude(),b.getM_Latitude());
         MyLatLng x = getMyLatLng(a, distance_ax_in_meter / 1000.0, angle);
-        GeoPoint xPoint = new GeoPoint(x.m_Longitude, x.m_Latitude);
+        GeoPoint xPoint = new GeoPoint(x.m_Longitude, x.m_Latitude, 0.0);
         return xPoint;
     }
 
@@ -188,28 +175,8 @@ public class TestService {
         }
         return angle;
     }
+
     private static final double EARTH_RADIUS = 6378.137; // 6378.137为地球半径(单位:千米)
-
-    // Java 计算两个GPS坐标点之间的距离
-    // lat1、lng1 表示A点经纬度，lat2、lng2 表示B点经纬度，计算出来的结果单位为千米
-    public static double getDistance1(double lat1, double lng1, double lat2, double lng2) {
-        double radLat1 = rad(lat1);
-        double radLat2 = rad(lat2);
-        double a = radLat1 - radLat2;      // a 是两坐标点的纬度之差
-        double b = rad(lng1) - rad(lng2);  // b 是两坐标点的经度之差
-
-        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2) +
-                Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2),2)));
-        s = s * EARTH_RADIUS;
-        System.out.println("s = " + s + "千米"); // 单位:千米
-
-        s = Math.round(s * 1000); // 转为米，用 Math.round() 取整
-//        s = s/1000; // 米转千米
-        return s;
-    }
-
-    private static double rad(double d) {  return d * Math.PI / 180.0; }
-
 
     /**
      * 根据经纬度，计算两点间的距离
@@ -235,9 +202,9 @@ public class TestService {
         double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) +
                 Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(b / 2), 2)));
         // 弧长乘地球半径, 返回单位: 千米
-        s =  s * EARTH_RADIUS;
+        s = s * EARTH_RADIUS;
         //System.out.println("距离"+s);
-        return s*1000;
+        return s * 1000;
     }
 
 }

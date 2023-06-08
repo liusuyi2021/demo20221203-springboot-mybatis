@@ -13,6 +13,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class GeoPoint {
-   Double longitude;
+    Double longitude;
     Double latitude;
+    Double altitude;
 }
