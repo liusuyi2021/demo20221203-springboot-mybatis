@@ -20,9 +20,9 @@
 <!--                        password="admin12345">-->
 <!--        </jdbcConnection>-->
         <jdbcConnection driverClass="org.postgresql.Driver"
-                        connectionURL="jdbc:postgresql://127.0.0.1:5432/ry-vue?stringtype=unspecified"
+                        connectionURL="jdbc:postgresql://192.168.1.15:5432/ry-vue?stringtype=unspecified"
                         userId="postgres"
-                        password="5959932">
+                        password="postgres">
         </jdbcConnection>
         <!-- 生成 model 类，targetPackage 指定 model 类的包名， targetProject 指定
        生成的 model 放在 eclipse 的哪个工程下面-->

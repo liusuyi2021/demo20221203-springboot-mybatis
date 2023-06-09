@@ -8,9 +8,9 @@ spring:
 #    password: 5959932
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://127.0.0.1:5432/ry-vue?stringtype=unspecified
+    url: jdbc:postgresql://192.168.1.15:5432/ry-vue?stringtype=unspecified
     username: postgres
-    password: 5959932
+    password: postgres
 mybatis:
   type-aliases-package: com.example.model.Student
   mapper-locations: classpath:/mapper/*.xml
